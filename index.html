@@ -3,22 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analog Clock Widget</title>
+    <title>Responsive Analog Clock Widget</title>
     <style>
+        :root {
+            --clock-size: min(80vw, 80vh);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: transparent;
+        }
+
         .clock {
-            width: 200px;
-            height: 200px;
+            width: var(--clock-size);
+            height: var(--clock-size);
             border-radius: 50%;
             background-color: #ffffff;
-            border: 4px solid #333;
+            border: calc(var(--clock-size) * 0.02) solid #333;
             position: relative;
-            margin: 50px auto;
+        }
+
+        .hour-marker {
+            position: absolute;
+            width: calc(var(--clock-size) * 0.01);
+            height: calc(var(--clock-size) * 0.075);
+            background: #333;
+            left: 50%;
+            top: 50%;
+            transform-origin: 50% 0;
         }
 
         .center-point {
             background-color: #333;
-            width: 10px;
-            height: 10px;
+            width: calc(var(--clock-size) * 0.05);
+            height: calc(var(--clock-size) * 0.05);
             position: absolute;
             left: 50%;
             top: 50%;
@@ -31,78 +54,54 @@
             bottom: 50%;
             left: 50%;
             transform-origin: bottom;
-            border-radius: 4px;
+            border-radius: calc(var(--clock-size) * 0.02);
         }
 
         .hour {
-            width: 4px;
-            height: 60px;
+            width: calc(var(--clock-size) * 0.02);
+            height: calc(var(--clock-size) * 0.3);
             background-color: #333;
             transform: translate(-50%, 0);
         }
 
         .minute {
-            width: 3px;
-            height: 80px;
+            width: calc(var(--clock-size) * 0.015);
+            height: calc(var(--clock-size) * 0.4);
             background-color: #666;
             transform: translate(-50%, 0);
         }
 
         .second {
-            width: 2px;
-            height: 90px;
+            width: calc(var(--clock-size) * 0.01);
+            height: calc(var(--clock-size) * 0.45);
             background-color: #cc0000;
             transform: translate(-50%, 0);
         }
-
-        /* Hour markers */
-        .marker {
-            width: 4px;
-            height: 12px;
-            background-color: #333;
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .marker:nth-child(1) { top: 10%; transform: translate(-50%, -50%) rotate(30deg); }
-        .marker:nth-child(2) { top: 20%; transform: translate(-50%, -50%) rotate(60deg); }
-        .marker:nth-child(3) { top: 30%; left: 90%; transform: translate(-50%, -50%) rotate(90deg); }
-        .marker:nth-child(4) { top: 70%; left: 90%; transform: translate(-50%, -50%) rotate(120deg); }
-        .marker:nth-child(5) { top: 80%; transform: translate(-50%, -50%) rotate(150deg); }
-        .marker:nth-child(6) { top: 90%; transform: translate(-50%, -50%) rotate(180deg); }
-        .marker:nth-child(7) { top: 80%; left: 10%; transform: translate(-50%, -50%) rotate(210deg); }
-        .marker:nth-child(8) { top: 70%; left: 10%; transform: translate(-50%, -50%) rotate(240deg); }
-        .marker:nth-child(9) { top: 30%; left: 10%; transform: translate(-50%, -50%) rotate(270deg); }
-        .marker:nth-child(10) { top: 20%; left: 20%; transform: translate(-50%, -50%) rotate(300deg); }
-        .marker:nth-child(11) { top: 10%; left: 30%; transform: translate(-50%, -50%) rotate(330deg); }
-        .marker:nth-child(12) { top: 5%; transform: translate(-50%, -50%) rotate(360deg); }
     </style>
 </head>
 <body>
     <div class="clock">
-        <!-- Hour markers -->
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-        <div class="marker"></div>
-
-        <!-- Clock hands -->
+        <div class="center-point"></div>
         <div class="hand hour"></div>
         <div class="hand minute"></div>
         <div class="hand second"></div>
-        <div class="center-point"></div>
     </div>
-
     <script>
+        function createHourMarkers() {
+            const clock = document.querySelector('.clock');
+            
+            for (let i = 0; i < 12; i++) {
+                const marker = document.createElement('div');
+                marker.className = 'hour-marker';
+                
+                // Calculate rotation (30 degrees per hour)
+                const rotation = i * 30;
+                marker.style.transform = `rotate(${rotation}deg) translate(-50%, -90%)`;
+                
+                clock.appendChild(marker);
+            }
+        }
+
         function updateClock() {
             const now = new Date();
             
@@ -120,6 +119,25 @@
                 `translate(-50%, 0) rotate(${hoursDegrees}deg)`;
         }
 
+        // Handle resize
+        function updateClockSize() {
+            const root = document.documentElement;
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+            root.style.setProperty('--clock-size', `${size}px`);
+        }
+
+        // Create hour markers
+        createHourMarkers();
+        
+        // Set up resize observer
+        const resizeObserver = new ResizeObserver(() => {
+            updateClockSize();
+        });
+        resizeObserver.observe(document.body);
+
+        // Initial size update
+        updateClockSize();
+        
         // Update clock every second
         setInterval(updateClock, 1000);
         // Initial update
